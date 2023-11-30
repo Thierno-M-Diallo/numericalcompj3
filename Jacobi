@@ -26,3 +26,12 @@ function Jacobi()
     if strcmp(input('Do you want to enter an approximation? (yes/no): ', 's'), 'yes')
         startingApprox = input('Enter a starting approximation: ');
     end
+
+  switch method
+        case 'jacobi'
+            [roots, iterations] = jacobi(coefficienMatrix, right, startingApprox, stopMethod, threshold);
+            disp('Roots:');
+            disp(roots);
+            disp(['Number of iter= ' num2str(iterations)]);
+            
+            
