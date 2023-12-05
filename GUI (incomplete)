@@ -1,137 +1,142 @@
 %[3 1 -4 7;-2 3 1 -5;2 0 5 10]
-            %[1 -2 4 6;8 -3 2 2;-1 10 2 4]
-            %[8 -3 2 2;-1 10 2 4;1 -2 4 6]
-            matrix = str2num(app.EnteranAugmentedMatrixEditField.Value);
-            %matrix = [3 1 -4 7;-2 3 1 -5;2 0 5 10];
-            flag = app.EnterastoppingcriterionEditField.Value;
-            tol = app.EnterathresholdvalueEditField.Value;
-            starting_value = str2num(app.EnterastartingapproximationEditField.Value);
+%[1 -2 4 6;8 -3 2 2;-1 10 2 4]
+%[8 -3 2 2;-1 10 2 4;1 -2 4 6]
+matrix = str2num(app.EnteranAugmentedMatrixEditField.Value);
+%matrix = [3 1 -4 7;-2 3 1 -5;2 0 5 10];
+flag = app.EnterastoppingcriterionEditField.Value;
+tol = app.EnterathresholdvalueEditField.Value;
+starting_value = str2num(app.EnterastartingapproximationEditField.Value);
 
-            [row, column] = size(matrix); %Getting row and column number for the matrix
-            A1 = matrix(:,1:column-1); %Removing the last column
+[row, column] = size(matrix); %Getting row and column number for the matrix
+A1 = matrix(:,1:column-1); %Removing the last column
 
-            switch app.ChooseMethodDropDown.Value
-                case 'Jacobi'
-                    [n, columns] = size(matrix);
-                    A = matrix(:,1:columns-1);
-                    b = matrix(:,(columns));
+switch app.ChooseMethodDropDown.Value
+    case 'Jacobi'
+        [n, columns] = size(matrix);
+        A = matrix(:,1:columns-1);
+        b = matrix(:,(columns));
 
-                    for i = 1:n
-                        b(i) = b(i)/A(i,i);
-                        new_x(i) = starting_value(i);
-                        for j = 1: n
-                            if i~=j
-                                A(i,j) = A(i,j)/A(i,i);
-                            end
-                        end
+        for i = 1:n
+            b(i) = b(i)/A(i,i);
+            new_x(i) = starting_value(i);
+            for j = 1: n
+                if i~=j
+                    A(i,j) = A(i,j)/A(i,i);
+                end
+            end
+        end
+
+        error = 10;
+
+        while(error > tol)
+            error = 0;
+
+            for i = 1:n
+                old_x(i) = new_x(i);
+                new_x(i) = b(i);
+            end
+
+            for i = 1:n
+                for j = 1: n
+                    if i~=j
+                        new_x(i) = new_x(i) - A(i,j) * old_x(j);
                     end
+                end
+                if flag == 1
+                    error = error + abs(new_x(i) - old_x(i));
+                end
+                if flag == 2
+                    error = error + ((new_x(i) - old_x(i)) * (new_x(i) - old_x(i)));
+                end
+            end
+            if flag == 1
+                error = error / n;
+            end
+            if flag == 2
+                error = sqrt(error/n);
+            end
+        end
+        fprintf("Error: %d\n", error);
+        fprintf("Roots: %f \n", new_x);
+        app.ErrorEditField.Value = (error);
+        app.RootsEditField.Value = char(new_x);
+        for i = 1:n
+            if 2 * abs(A(i,i)) > sum(abs(A(i,:)))
+                notdiagdominant = "The matrix is not diagonally dominant";
+                app.RootsTextArea.Value = notdiagdominant;
+                return
+            else
+                diagdominant = "The matrix is diagonally dominant";
+                app.IsthematrixdiagonallydominantTextArea.Value = diagdominant;
+                break;
+            end
+        end
 
-                    error = 10;
+    case 'Gauss-Seidel'
+        [n, columns] = size(matrix);
+        A = matrix(:,1:columns-1);
+        b = matrix(:,(columns));
 
-                    while(error > tol)
-                        error = 0;
+        for i = 1:n
+            b(i) = b(i)/A(i,i);
+            x(i) = starting_value(i);
+            old_x(i) = x(i);
+            for j = 1: n
+                if i~=j
+                    A(i,j) = A(i,j)/A(i,i);
+                end
+            end
+        end
 
-                        for i = 1:n
-                            old_x(i) = new_x(i);
-                            new_x(i) = b(i);
-                        end
+        error = 10;
 
-                        for i = 1:n
-                            for j = 1: n
-                                if i~=j
-                                    new_x(i) = new_x(i) - A(i,j) * old_x(j);
-                                end
-                            end
-                            if flag == 1
-                                error = error + abs(new_x(i) - old_x(i));
-                            end
-                            if flag == 2
-                                error = error + ((new_x(i) - old_x(i)) * (new_x(i) - old_x(i)));
-                            end
-                        end
-                        if flag == 1
-                            error = error / n;
-                        end
-                        if flag == 2
-                            error = sqrt(error/n);
-                        end
+        while(error > tol)
+            error = 0;
+            for i = 1:n
+                x(i) = b(i);
+                for j = 1:n
+                    if i~=j
+                        x(i) = x(i) - A(i,j) * x(j);
                     end
-                    fprintf("Error: %d\n", error);
-                    fprintf("Roots: %f \n", new_x);
-                    app.ErrorEditField.Value = (error);
-                    app.RootsEditField.Value = char(new_x);
-                    for i = 1:n
-                        if 2 * abs(A(i,i)) > sum(abs(A(i,:)))
-                            notdiagdominant = "The matrix is not diagonally dominant";
-                            app.RootsTextArea.Value = notdiagdominant;
-                            return
-                        else
-                            diagdominant = "The matrix is diagonally dominant";
-                            app.IsthematrixdiagonallydominantTextArea.Value = diagdominant;
-                            break;
-                        end
-                    end
+                end
+                if flag == 1
+                    error = error + abs(x(i) - old_x(i));
+                end
+                if flag == 2
+                    error = error + ((x(i) - old_x(i)) * (x(i) - old_x(i)));
+                end
+                old_x(i) = x(i);
+            end
+            if flag == 1
+                error = error / n;
+            end
+            if flag == 2
+                error = sqrt(error/n);
+            end
+        end
+        fprintf("Matrix: %d \n", matrix);
+        fprintf("Error: %d\n", error);
+        fprintf("Roots: %f \n", x);
+        fprintf("Roots: %s \n", char(x));
+        app.ErrorEditField.Value = error;
+        app.RootsEditField.Value = double(x);
+        app.Roots2EditField.Value = double(x);
+        app.Roots3EditField.Value = double(x);
 
-                case 'Gauss-Seidel'
-[n, columns] = size(matrix);
-A = matrix(:,1:columns-1);
-b = matrix(:,(columns));
-
-for i = 1:n
-b(i) = b(i)/A(i,i);
-x(i) = starting_value(i);
-old_x(i) = x(i);
-for j = 1: n
-if i~=j
-A(i,j) = A(i,j)/A(i,i);
-end
-end
+        for i = 1:n
+            if 2 * abs(A(i,i)) > sum(abs(A(i,:)))
+                notdiagdominant = "The matrix is not diagonally dominant";
+                app.IsthematrixdiagonallydominantTextArea.Value = notdiagdominant;
+                return
+            else
+                diagdominant = "The matrix is diagonally dominant";
+                app.IsthematrixdiagonallydominantTextArea.Value = diagdominant;
+                break;
+            end
+        end
 end
 
-error = 10;
 
-while(error > tol)
-error = 0;
-for i = 1:n
-x(i) = b(i);
-for j = 1:n
-if i~=j
-x(i) = x(i) - A(i,j) * x(j);
-end
-end
-if flag == 1
-error = error + abs(x(i) - old_x(i));
-end
-if flag == 2
-error = error + ((x(i) - old_x(i)) * (x(i) - old_x(i)));
-end
-old_x(i) = x(i);
-end
-if flag == 1
-error = error / n;
-end
-if flag == 2
-error = sqrt(error/n);
-end
-end
-fprintf("Matrix: %d \n", matrix);
-fprintf("Error: %d\n", error);
-fprintf("Roots: %f \n", x);
-fprintf("Roots: %s \n", char(x));
-app.ErrorEditField.Value = error;
-app.RootsEditField.Value = double(x);
-app.Roots2EditField.Value = double(x);
-app.Roots3EditField.Value = double(x);
 
-for i = 1:n
-if 2 * abs(A(i,i)) > sum(abs(A(i,:)))
-notdiagdominant = "The matrix is not diagonally dominant";
-app.IsthematrixdiagonallydominantTextArea.Value = notdiagdominant;
-return
-else
-diagdominant = "The matrix is diagonally dominant";
-app.IsthematrixdiagonallydominantTextArea.Value = diagdominant;
-break;
-end
-end
-end
+    
+    
