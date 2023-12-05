@@ -1,73 +1,88 @@
 //I hardcoded the matrix/ a majority of things. need to add more user implementation in order to abide by the rules
 //also eventually change to matlab format
 
+//12-5 UPDATED
+//added user implementation of code, user can put things to it
+
+
 #include <iostream>
 #include <vector>
 #include <cmath>
 
-// Function to print the matrix
-void printMatrix(const std::vector<std::vector<double>>& matrix) {
-    for (const auto& row : matrix) {
-        for (auto val : row) {
-            std::cout << val << " ";
-        }
-        std::cout << std::endl;
-    }
-}
+using namespace std;
 
-// The Gauss-Seidel iterative method function
-std::vector<double> gaussSeidel(std::vector<std::vector<double>> matrix, double tolerance) {
-    int n = matrix.size();
-    std::vector<double> x(n, 0.0); // Starting approximation at zero
-    std::vector<double> x_old(n, 0.0);
-    bool continueIteration = true;
+vector<double> gaussSeidel(vector<vector<double>>& A, vector<double>& b, vector<double>& initialGuess, double tolerance) {
+    int n = A.size();
+    vector<double> x = initialGuess;
+    vector<double> prevX(n);
+    bool continueIteration;
 
-    while (continueIteration) {
+    do {
         continueIteration = false;
-        for (int i = 0; i < n; i++) {
-            double sum = matrix[i][n]; // b[i]
-            for (int j = 0; j < n; j++) {
-                if (j != i) {
-                    sum -= matrix[i][j] * x[j];
+        for (int i = 0; i < n; ++i) {
+            prevX[i] = x[i];
+        }
+
+        for (int i = 0; i < n; ++i) {
+            double sum = 0.0;
+            for (int j = 0; j < n; ++j) {
+                if (i != j) {
+                    sum += A[i][j] * x[j];
                 }
             }
-            sum /= matrix[i][i];
-            if (std::abs(x[i] - sum) > tolerance) {
-                continueIteration = true;
-            }
-            x_old[i] = x[i];
-            x[i] = sum;
-        }
+            x[i] = (b[i] - sum) / A[i][i];
 
-        // Check for convergence
-        for (int i = 0; i < n; i++) {
-            if (std::abs(x[i] - x_old[i]) > tolerance) {
+            if (abs(x[i] - prevX[i]) > tolerance) {
                 continueIteration = true;
-                break;
             }
         }
-    }
+    } while (continueIteration);
 
     return x;
 }
 
 int main() {
-    // Example matrix with the system of equations in the form Ax = b
-    // The last column represents the vector b
-    std::vector<std::vector<double>> matrix = {
-        {4, 1, 1, 9},
-        {1, 4, -1, 1},
-        {1, -1, 3, 7}
-    };
+    int n;
+    cout << "Enter the number of variables: ";
+    cin >> n;
 
-    double tolerance = 0.0001; // Stopping criterion
-    std::vector<double> results = gaussSeidel(matrix, tolerance);
+    vector<vector<double>> A(n, vector<double>(n));
+    vector<double> b(n);
+    vector<double> initialGuess(n);
 
-    std::cout << "The roots are:" << std::endl;
-    for (auto root : results) {
-        std::cout << root << std::endl;
+    cout << "Enter the augmented matrix row by row, ending each row with the right-hand side value:\n";
+    for (int i = 0; i < n; ++i) {
+        cout << "Row " << (i + 1) << ": ";
+        for (int j = 0; j < n; ++j) {
+            cin >> A[i][j];
+        }
+        cin >> b[i];
+    }
+
+    cout << "Enter initial guesses for the solution:\n";
+    for (int i = 0; i < n; ++i) {
+        cout << "Initial guess for x[" << (i + 1) << "]: ";
+        cin >> initialGuess[i];
+    }
+
+    double tolerance;
+    cout << "Enter the tolerance for the stopping criterion: ";
+    cin >> tolerance;
+
+    vector<double> x = gaussSeidel(A, b, initialGuess, tolerance);
+
+    cout << "The solution is:\n";
+    for (int i = 0; i < n; ++i) {
+        cout << "x[" << (i + 1) << "] = " << x[i] << endl;
     }
 
     return 0;
 }
+
+
+
+
+
+
+
 
