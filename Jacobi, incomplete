@@ -37,7 +37,7 @@ end
 
 function [roots, iterations] = jacobiMethod(A, b, x0, stopMethod, threshold)
     n = length(b);
-    maxIterations = 1000;  % You can adjust the maximum number of iterations as needed
+    maxIterations = 1000; 
     x = x0;
 
     for iterations = 1:maxIterations
