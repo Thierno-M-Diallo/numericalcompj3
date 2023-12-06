@@ -1,4 +1,4 @@
-function jacobi()
+unction Jacobi()
     n = input('Enter a number of equations: ');
 
     disp('Enter the matrix including coefficients');
@@ -27,7 +27,7 @@ function jacobi()
     end
 
     switch method
-        case 'jacobi'
+        case 'Jacobi'  % Corrected case for Jacobi
             [roots, iterations] = jacobiMethod(coefficientMatrix, right, startingApprox, stopMethod, threshold);
             disp('Roots:');
             disp(roots);
@@ -44,7 +44,7 @@ function [roots, iterations] = jacobiMethod(A, b, x0, stopMethod, threshold)
         xOld = x;
 
         for i = 1:n
-            sigma = A(i, 1:i-1) * xOld(1:i-1) + A(i, i+1:end) * xOld(i+1:end);
+            sigma = sum(A(i, 1:i-1) .* xOld(1:i-1)) + sum(A(i, i+1:end) .* xOld(i+1:end));
             x(i) = (b(i) - sigma) / A(i, i);
         end
 
