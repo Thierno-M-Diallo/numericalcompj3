@@ -1,23 +1,22 @@
-function Jacobi()
+function jacobi()
+    n = input('Enter a number of equations: ');
 
-    n = input('Enter a number of equations ');
-
-    disp('Enter the matrix include coefficients');
+    disp('Enter the matrix including coefficients');
     coefficientMatrix = zeros(n, n + 1);
     for i = 1:n
-        row_values = input(['Enter the coefficients:' num2str(i) ': ']);
+        row_values = input(['Enter the coefficients for equation ' num2str(i) ': ']);
         coefficientMatrix(i, :) = row_values;
     end
 
     right = coefficientMatrix(:, end);
     coefficientMatrix = coefficientMatrix(:, 1:end-1);
 
-    method = input('Choose either Gauss or Jacobi');
-    stopMethod = input('Choose a stop method: ', 's');
+    method = input('Choose either Gauss or Jacobi: ', 's');
+    stopMethod = input('Choose a stop method (threshold): ', 's');
 
     switch stopMethod
         case 'threshold'
-            threshold = input('Enter ');
+            threshold = input('Enter the threshold: ');
         otherwise
             threshold = NaN;
     end
@@ -27,11 +26,39 @@ function Jacobi()
         startingApprox = input('Enter a starting approximation: ');
     end
 
-  switch method
+    switch method
         case 'jacobi'
-            [roots, iterations] = jacobi(coefficienMatrix, right, startingApprox, stopMethod, threshold);
+            [roots, iterations] = jacobiMethod(coefficientMatrix, right, startingApprox, stopMethod, threshold);
             disp('Roots:');
             disp(roots);
-            disp(['Number of iter= ' num2str(iterations)]);
+            disp(['Number of iterations = ' num2str(iterations)]);
+    end
+end
+
+function [roots, iterations] = jacobiMethod(A, b, x0, stopMethod, threshold)
+    n = length(b);
+    maxIterations = 1000;  % You can adjust the maximum number of iterations as needed
+    x = x0;
+
+    for iterations = 1:maxIterations
+        xOld = x;
+
+        for i = 1:n
+            sigma = A(i, 1:i-1) * xOld(1:i-1) + A(i, i+1:end) * xOld(i+1:end);
+            x(i) = (b(i) - sigma) / A(i, i);
+        end
+
+        % Stopping criteria
+        switch stopMethod
+            case 'threshold'
+                if norm(x - xOld, inf) < threshold
+                    break;
+                end
+        end
+    end
+
+    roots = x;
+end
+
             
             
