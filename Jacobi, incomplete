@@ -1,4 +1,4 @@
-unction Jacobi()
+Function Jacobi()
     n = input('Enter a number of equations: ');
 
     disp('Enter the matrix including coefficients');
