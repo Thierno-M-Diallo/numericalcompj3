@@ -5,84 +5,62 @@
 //added user implementation of code, user can put things to it
 
 
-#include <iostream>
-#include <vector>
-#include <cmath>
+function gauss_seidel_method
+    % User input for the size of the matrix
+    n = input('Enter the number of unknowns: ');
+    
+    % Initialize the augmented matrix with zeros
+    A = zeros(n,n+1);
+    
+    % User input for augmented matrix
+    fprintf('Enter augmented matrix coefficients row-wise:\n');
+    for i=1:n
+        for j=1:n+1
+            A(i,j) = input(sprintf('A(%d,%d) = ', i, j));
+        end
+    end
+    
+    % User input for initial guess
+    initial_guess = input('Enter initial guess or press Enter to use zeros: ', 's');
+    if isempty(initial_guess)
+        x = zeros(n,1);
+    else
+        x = str2num(initial_guess);
+    end
+    
+    % Tolerance and maximum iterations
+    tol = input('Enter the tolerance for method: ');
+    max_iter = input('Enter maximum number of iterations: ');
+    
+    % Gauss-Seidel Iteration
+    x = gaussSeidel(A, x, tol, max_iter);
+    
+    % Display the results
+    disp('The solution vector is: ');
+    disp(x);
+end
 
-using namespace std;
-
-vector<double> gaussSeidel(vector<vector<double>>& A, vector<double>& b, vector<double>& initialGuess, double tolerance) {
-    int n = A.size();
-    vector<double> x = initialGuess;
-    vector<double> prevX(n);
-    bool continueIteration;
-
-    do {
-        continueIteration = false;
-        for (int i = 0; i < n; ++i) {
-            prevX[i] = x[i];
-        }
-
-        for (int i = 0; i < n; ++i) {
-            double sum = 0.0;
-            for (int j = 0; j < n; ++j) {
-                if (i != j) {
-                    sum += A[i][j] * x[j];
-                }
-            }
-            x[i] = (b[i] - sum) / A[i][i];
-
-            if (abs(x[i] - prevX[i]) > tolerance) {
-                continueIteration = true;
-            }
-        }
-    } while (continueIteration);
-
-    return x;
-}
-
-int main() {
-    int n;
-    cout << "Enter the number of variables: ";
-    cin >> n;
-
-    vector<vector<double>> A(n, vector<double>(n));
-    vector<double> b(n);
-    vector<double> initialGuess(n);
-
-    cout << "Enter the augmented matrix row by row, ending each row with the right-hand side value:\n";
-    for (int i = 0; i < n; ++i) {
-        cout << "Row " << (i + 1) << ": ";
-        for (int j = 0; j < n; ++j) {
-            cin >> A[i][j];
-        }
-        cin >> b[i];
-    }
-
-    cout << "Enter initial guesses for the solution:\n";
-    for (int i = 0; i < n; ++i) {
-        cout << "Initial guess for x[" << (i + 1) << "]: ";
-        cin >> initialGuess[i];
-    }
-
-    double tolerance;
-    cout << "Enter the tolerance for the stopping criterion: ";
-    cin >> tolerance;
-
-    vector<double> x = gaussSeidel(A, b, initialGuess, tolerance);
-
-    cout << "The solution is:\n";
-    for (int i = 0; i < n; ++i) {
-        cout << "x[" << (i + 1) << "] = " << x[i] << endl;
-    }
-
-    return 0;
-}
-
-
-
-
-
-
-
-
+function x = gaussSeidel(A, x, tol, max_iter)
+    n = size(A, 1);
+    for iter = 1:max_iter
+        x_old = x;
+        
+        for i = 1:n
+            sigma = 0;
+            for j = 1:n
+                if j ~= i
+                    sigma = sigma + A(i,j) * x(j);
+                end
+            end
+            x(i) = (A(i,n+1) - sigma) / A(i,i);
+        end
+        
+        % Stopping condition
+        if norm(x - x_old, inf) < tol
+            return;
+        end
+    end
+    
+    % If reached here, max iterations were reached without converging
+    disp('The method did not converge.');
+end
