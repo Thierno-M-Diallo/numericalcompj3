@@ -4,8 +4,10 @@
 //12-5 UPDATED
 //added user implementation of code, user can put things to it
 
-
+//12-7 UPDATED
+//converted to matlab format
 function gauss_seidel_method
+
     % User input for the size of the matrix
     n = input('Enter the number of unknowns: ');
     
