@@ -27,7 +27,7 @@ Function Jacobi()
     end
 
     switch method
-        case 'Jacobi'  % Corrected case for Jacobi
+        case 'Jacobi' 
             [roots, iterations] = jacobiMethod(coefficientMatrix, right, startingApprox, stopMethod, threshold);
             disp('Roots:');
             disp(roots);
@@ -44,14 +44,14 @@ function [roots, iterations] = jacobiMethod(A, b, x0, stopMethod, threshold)
         xOld = x;
 
         for i = 1:n
-            sigma = sum(A(i, 1:i-1) .* xOld(1:i-1)) + sum(A(i, i+1:end) .* xOld(i+1:end));
+            sigma = sum(A(i, 1:i-1) .* xPrev(1:i-1)) + sum(A(i, i+1:end) .* xPrev(i+1:end));
             x(i) = (b(i) - sigma) / A(i, i);
         end
 
-        % Stopping criteria
+        % Stopping Method
         switch stopMethod
             case 'threshold'
-                if norm(x - xOld, inf) < threshold
+                if norm(x - xPrev, inf) < threshold
                     break;
                 end
         end
