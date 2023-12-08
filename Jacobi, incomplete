@@ -35,7 +35,7 @@ function Jacobi()
     end
 
     startApprox = NaN;
-    if strcmp(input('Do you want to enter an approximation? yes or no: ', 's'), 'yes')
+    if strcmp(input('Do you want to enter an approximation? Please enter yes or no: ', 's'), 'yes')
         startApprox = str2num(input('Please Enter the starting approximation: ', 's'));
 
         if isempty(startApprox) || ~isvector(startApprox) || numel(startApprox) ~= n
@@ -99,5 +99,4 @@ end
 function diagonalDominance = isDiagDominant(A)
     diagonalDominance = all(abs(diag(A)) > sum(abs(A), 2) - abs(diag(A)));
 end
- 
-            
+
