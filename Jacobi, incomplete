@@ -1,9 +1,8 @@
-
 function Jacobi()
     n = input('Enter a number of equations: ');
 
-    disp('Enter the matrix include the coefficients');
-    coefficientMatrix = zeros(n, n + 1);
+    disp('Enter the augmented matrix');
+    augmentedMatrix = zeros(n, n + 1);
 
     for i = 1:n
         rowVal = str2num(input(['Enter the coefficients ' num2str(i) ': '], 's'));
@@ -13,18 +12,25 @@ function Jacobi()
             return;
         end
 
-        coefficientMatrix(i, :) = rowVal;
+        augmentedMatrix(i, :) = rowVal;
     end
 
-    right = coefficientMatrix(:, end);
-    coefficientMatrix = coefficientMatrix(:, 1:end-1);
+    right = augmentedMatrix(:, end);
+    coefficientMatrix = augmentedMatrix(:, 1:end-1);
 
-    if ~isDiagDominant(coefficientMatrix)
-        disp('Invalid: The Matrix is not diagonally dominant.');
+    %  matrix singular
+    if rank(coefficientMatrix) < rank(augmentedMatrix)
+        disp('Error: The matrix is singular. No unique solution exists.');
         return;
     end
 
-    method = input('Enter the Jacobi method: ', 's');
+    %  diagonal dominance
+    if ~isDiagDominant(coefficientMatrix)
+        disp('Warning: The matrix is not diagonally dominant.');
+      
+    end
+
+    method = input('Enter the iterative method (Jacobi): ', 's');
     stopMethod = input('Choose a stop method: ', 's');
 
     switch stopMethod
@@ -48,17 +54,15 @@ function Jacobi()
         case 'Jacobi'
             [x, iterations] = jacobiMethod(coefficientMatrix, right, startApprox, stopMethod, threshold);
 
-  
             disp('Roots:');
             disp(x);
             disp(['Number of iterations = ' num2str(iterations)]);
 
-            
             trueError = calculateTrueMeanAbsoluteError(coefficientMatrix, right, x);
             disp(['True Mean Absolute Error: ' num2str(trueError)]);
 
         otherwise
-            disp('Error must use Jacobi.');
+            disp('Error: Invalid iterative method. Use Jacobi.');
     end
 end
 
@@ -76,19 +80,18 @@ function [x, iterations] = jacobiMethod(A, b, x0, stopMethod, threshold)
             x(i) = (b(i) - sigma) / A(i, i);
         end
 
-     
-switch stopMethod
-    case 'threshold'
-        if norm(x - xPrev, inf) < threshold
-            break;
+        switch stopMethod
+            case 'threshold'
+                if norm(x - xPrev, inf) < threshold
+                    break;
+                end
         end
-end
 
         iterations = iterations + 1;
     end
 
     if iterations == maxIterations
-        disp('Maximum num of iterations.');
+        disp('Maximum number of iterations reached.');
     end
 end
 
