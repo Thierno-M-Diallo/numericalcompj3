@@ -1,8 +1,45 @@
+classdef app1 < matlab.apps.AppBase
+
+    % Properties that correspond to app components
+    properties (Access = public)
+        UIFigure                       matlab.ui.Figure
+        JacobiGaussSeidelIterativeMethodsLabel  matlab.ui.control.Label
+        RMSELabel                      matlab.ui.control.Label
+        MAELabel                       matlab.ui.control.Label
+        RootsEditField                 matlab.ui.control.EditField
+        RootsEditFieldLabel            matlab.ui.control.Label
+        IsthematrixdiagonallydominantTextArea  matlab.ui.control.TextArea
+        IsthematrixdiagonallydominantTextAreaLabel  matlab.ui.control.Label
+        EnterathresholdvalueEditField  matlab.ui.control.EditField
+        EnterathresholdvalueEditFieldLabel  matlab.ui.control.Label
+        EnterastartingapproximationEditField  matlab.ui.control.EditField
+        EnterastartingapproximationEditFieldLabel  matlab.ui.control.Label
+        EnteranAugmentedMatrixEditField  matlab.ui.control.EditField
+        EnteranAugmentedMatrixEditField_2Label  matlab.ui.control.Label
+        EnterastoppingcriterionEditField  matlab.ui.control.NumericEditField
+        EnterastoppingcriterionLabel   matlab.ui.control.Label
+        ErrorEditField                 matlab.ui.control.NumericEditField
+        ErrorEditFieldLabel            matlab.ui.control.Label
+        calculateButton                matlab.ui.control.Button
+        ChooseMethodDropDown           matlab.ui.control.DropDown
+        ChooseMethodDropDownLabel      matlab.ui.control.Label
+    end
+
+
+
+    
+
+    % Callbacks that handle component events
+    methods (Access = private)
+
+        % Button pushed function: calculateButton
+        function calculateButtonPushed(app, event)
 %[3 1 -4 7;-2 3 1 -5;2 0 5 10]
 %[1 -2 4 6;8 -3 2 2;-1 10 2 4]
 %[8 -3 2 2;-1 10 2 4;1 -2 4 6]
+%matrix = [3 1 -4 7;-2 3 1 -5;2 0 5 10]
 matrix = str2num(app.EnteranAugmentedMatrixEditField.Value);
-%matrix = [3 1 -4 7;-2 3 1 -5;2 0 5 10];
+
 flag = app.EnterastoppingcriterionEditField.Value;
 tol = app.EnterathresholdvalueEditField.Value;
 starting_value = str2num(app.EnterastartingapproximationEditField.Value);
@@ -59,11 +96,11 @@ switch app.ChooseMethodDropDown.Value
         fprintf("Error: %d\n", error);
         fprintf("Roots: %f \n", new_x);
         app.ErrorEditField.Value = (error);
-        app.RootsEditField.Value = char(new_x);
+        app.RootsEditField.Value = strjoin(string(new_x), ', ');
         for i = 1:n
             if 2 * abs(A(i,i)) > sum(abs(A(i,:)))
                 notdiagdominant = "The matrix is not diagonally dominant";
-                app.RootsTextArea.Value = notdiagdominant;
+                app.IsthematrixdiagonallydominantTextArea.Value = notdiagdominant;
                 return
             else
                 diagdominant = "The matrix is diagonally dominant";
@@ -119,9 +156,9 @@ switch app.ChooseMethodDropDown.Value
         fprintf("Roots: %f \n", x);
         fprintf("Roots: %s \n", char(x));
         app.ErrorEditField.Value = error;
-        app.RootsEditField.Value = double(x);
-        app.Roots2EditField.Value = double(x);
-        app.Roots3EditField.Value = double(x);
+        app.RootsEditField.Value = strjoin(string(x), ', ');
+       % app.Roots2EditField.Value = double(x);
+        %app.Roots3EditField.Value = double(x);
 
         for i = 1:n
             if 2 * abs(A(i,i)) > sum(abs(A(i,:)))
@@ -135,8 +172,167 @@ switch app.ChooseMethodDropDown.Value
             end
         end
 end
+        end
+    end
 
+    % Component initialization
+    methods (Access = private)
 
+        % Create UIFigure and components
+        function createComponents(app)
+
+            % Create UIFigure and hide until all components are created
+            app.UIFigure = uifigure('Visible', 'off');
+            app.UIFigure.Color = [0.0745 0.6235 1];
+            colormap(app.UIFigure, 'abyss');
+            app.UIFigure.Position = [100 100 640 480];
+            app.UIFigure.Name = 'MATLAB App';
+
+            % Create ChooseMethodDropDownLabel
+            app.ChooseMethodDropDownLabel = uilabel(app.UIFigure);
+            app.ChooseMethodDropDownLabel.HorizontalAlignment = 'right';
+            app.ChooseMethodDropDownLabel.Position = [34 361 90 22];
+            app.ChooseMethodDropDownLabel.Text = 'Choose Method';
+
+            % Create ChooseMethodDropDown
+            app.ChooseMethodDropDown = uidropdown(app.UIFigure);
+            app.ChooseMethodDropDown.Items = {'Jacobi', 'Gauss-Seidel'};
+            app.ChooseMethodDropDown.Position = [139 354 118 35];
+            app.ChooseMethodDropDown.Value = 'Gauss-Seidel';
+
+            % Create calculateButton
+            app.calculateButton = uibutton(app.UIFigure, 'push');
+            app.calculateButton.ButtonPushedFcn = createCallbackFcn(app, @calculateButtonPushed, true);
+            app.calculateButton.Position = [130 20 140 33];
+            app.calculateButton.Text = 'calculate';
+
+            % Create ErrorEditFieldLabel
+            app.ErrorEditFieldLabel = uilabel(app.UIFigure);
+            app.ErrorEditFieldLabel.HorizontalAlignment = 'right';
+            app.ErrorEditFieldLabel.Position = [30 240 32 22];
+            app.ErrorEditFieldLabel.Text = 'Error';
+
+            % Create ErrorEditField
+            app.ErrorEditField = uieditfield(app.UIFigure, 'numeric');
+            app.ErrorEditField.Editable = 'off';
+            app.ErrorEditField.Position = [77 230 195 42];
+
+            % Create EnterastoppingcriterionLabel
+            app.EnterastoppingcriterionLabel = uilabel(app.UIFigure);
+            app.EnterastoppingcriterionLabel.HorizontalAlignment = 'right';
+            app.EnterastoppingcriterionLabel.Position = [361 340 142 22];
+            app.EnterastoppingcriterionLabel.Text = 'Enter a stopping criterion';
+
+            % Create EnterastoppingcriterionEditField
+            app.EnterastoppingcriterionEditField = uieditfield(app.UIFigure, 'numeric');
+            app.EnterastoppingcriterionEditField.Position = [513 341 34 20];
+            app.EnterastoppingcriterionEditField.Value = 1;
+
+            % Create EnteranAugmentedMatrixEditField_2Label
+            app.EnteranAugmentedMatrixEditField_2Label = uilabel(app.UIFigure);
+            app.EnteranAugmentedMatrixEditField_2Label.HorizontalAlignment = 'right';
+            app.EnteranAugmentedMatrixEditField_2Label.FontWeight = 'bold';
+            app.EnteranAugmentedMatrixEditField_2Label.Position = [83 395 161 22];
+            app.EnteranAugmentedMatrixEditField_2Label.Text = 'Enter an Augmented Matrix';
+
+            % Create EnteranAugmentedMatrixEditField
+            app.EnteranAugmentedMatrixEditField = uieditfield(app.UIFigure, 'text');
+            app.EnteranAugmentedMatrixEditField.HorizontalAlignment = 'center';
+            app.EnteranAugmentedMatrixEditField.FontWeight = 'bold';
+            app.EnteranAugmentedMatrixEditField.BackgroundColor = [0.9412 0.9412 0.9412];
+            app.EnteranAugmentedMatrixEditField.Position = [259 395 279 22];
+            app.EnteranAugmentedMatrixEditField.Value = '[8 -3 2 2;-1 10 2 4;1 -2 4 6]';
+
+            % Create EnterastartingapproximationEditFieldLabel
+            app.EnterastartingapproximationEditFieldLabel = uilabel(app.UIFigure);
+            app.EnterastartingapproximationEditFieldLabel.HorizontalAlignment = 'right';
+            app.EnterastartingapproximationEditFieldLabel.Position = [329 293 165 22];
+            app.EnterastartingapproximationEditFieldLabel.Text = 'Enter a starting approximation';
+
+            % Create EnterastartingapproximationEditField
+            app.EnterastartingapproximationEditField = uieditfield(app.UIFigure, 'text');
+            app.EnterastartingapproximationEditField.Position = [509 293 85 22];
+            app.EnterastartingapproximationEditField.Value = '[0;0;0]';
+
+            % Create EnterathresholdvalueEditFieldLabel
+            app.EnterathresholdvalueEditFieldLabel = uilabel(app.UIFigure);
+            app.EnterathresholdvalueEditFieldLabel.HorizontalAlignment = 'right';
+            app.EnterathresholdvalueEditFieldLabel.Position = [330 240 128 22];
+            app.EnterathresholdvalueEditFieldLabel.Text = 'Enter a threshold value';
+
+            % Create EnterathresholdvalueEditField
+            app.EnterathresholdvalueEditField = uieditfield(app.UIFigure, 'text');
+            app.EnterathresholdvalueEditField.Position = [473 240 121 22];
+            app.EnterathresholdvalueEditField.Value = '0.001';
+
+            % Create IsthematrixdiagonallydominantTextAreaLabel
+            app.IsthematrixdiagonallydominantTextAreaLabel = uilabel(app.UIFigure);
+            app.IsthematrixdiagonallydominantTextAreaLabel.HorizontalAlignment = 'right';
+            app.IsthematrixdiagonallydominantTextAreaLabel.Position = [61 82 180 22];
+            app.IsthematrixdiagonallydominantTextAreaLabel.Text = 'Is the matrix diagonally dominant';
+
+            % Create IsthematrixdiagonallydominantTextArea
+            app.IsthematrixdiagonallydominantTextArea = uitextarea(app.UIFigure);
+            app.IsthematrixdiagonallydominantTextArea.Position = [256 73 238 33];
+
+            % Create RootsEditFieldLabel
+            app.RootsEditFieldLabel = uilabel(app.UIFigure);
+            app.RootsEditFieldLabel.HorizontalAlignment = 'right';
+            app.RootsEditFieldLabel.Position = [35 293 36 22];
+            app.RootsEditFieldLabel.Text = 'Roots';
+
+            % Create RootsEditField
+            app.RootsEditField = uieditfield(app.UIFigure, 'text');
+            app.RootsEditField.Position = [86 293 192 22];
+
+            % Create MAELabel
+            app.MAELabel = uilabel(app.UIFigure);
+            app.MAELabel.Position = [557 354 51 22];
+            app.MAELabel.Text = '1 = MAE';
+
+            % Create RMSELabel
+            app.RMSELabel = uilabel(app.UIFigure);
+            app.RMSELabel.Position = [558 326 60 22];
+            app.RMSELabel.Text = '2 = RMSE';
+
+            % Create JacobiGaussSeidelIterativeMethodsLabel
+            app.JacobiGaussSeidelIterativeMethodsLabel = uilabel(app.UIFigure);
+            app.JacobiGaussSeidelIterativeMethodsLabel.HorizontalAlignment = 'center';
+            app.JacobiGaussSeidelIterativeMethodsLabel.FontSize = 18;
+            app.JacobiGaussSeidelIterativeMethodsLabel.FontWeight = 'bold';
+            app.JacobiGaussSeidelIterativeMethodsLabel.Position = [132 432 374 37];
+            app.JacobiGaussSeidelIterativeMethodsLabel.Text = 'Jacobi & Gauss Seidel: Iterative Methods ';
+
+            % Show the figure after all components are created
+            app.UIFigure.Visible = 'on';
+        end
+    end
+
+    % App creation and deletion
+    methods (Access = public)
+
+        % Construct app
+        function app = app1
+
+            % Create UIFigure and components
+            createComponents(app)
+
+            % Register the app with App Designer
+            registerApp(app, app.UIFigure)
+
+            if nargout == 0
+                clear app
+            end
+        end
+
+        % Code that executes before app deletion
+        function delete(app)
+
+            % Delete UIFigure when app is deleted
+            delete(app.UIFigure)
+        end
+    end
+end
 
     
     
