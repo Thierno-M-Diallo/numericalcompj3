@@ -1,0 +1,139 @@
+function Jacobi(app)
+    n = app.NumberofequationsEditField.Value;
+
+    disp('Enter the augmented matrix');
+    matrix = zeros(n, n + 1);
+
+    for i = 1:n
+        rowValStr = input(['Enter the augmented row ' num2str(i)], 's');
+        
+        rowVal = str2num(rowValStr);
+        
+        if isempty(rowVal) || numel(rowVal) ~= n + 1
+            disp('Error: Incorrect number of elements in the augmented row.');
+            return;
+        end
+
+        matrix(i, :) = rowVal;
+    end
+
+    right = matrix(:, end);
+    coefficientMatrix = matrix(:, 1:end-1);
+
+    if rank(coefficientMatrix) < rank(matrix)
+        disp('Error: The matrix is singular. No unique solution exists.');
+        return;
+    end
+
+    if ~isDiagDominant(coefficientMatrix)
+        disp('Warning: The matrix is not diagonally dominant.');
+    end
+
+    method = 'Jacobi';  
+    stopMethod = app.ChoosestoppingcriterionDropDown.Value;
+
+    threshold = NaN;
+
+    switch stopMethod
+        case 'threshold'
+            threshold = app.EnterathresholdvalueEditField.Value;
+            if isnan(threshold) || threshold <= 0
+                disp('Error: Invalid threshold input. Threshold must be a positive number.');
+                return;
+            end
+        case 'mae'
+            threshold = app.EnterathresholdvalueEditField.Value;
+            if isnan(threshold) || threshold <= 0
+                disp('Error: Invalid threshold input. Threshold must be a positive number.');
+                return;
+            end
+        case 'rmse'
+            threshold = app.EnterathresholdvalueEditField.Value;
+            if isnan(threshold) || threshold <= 0
+                disp('Error: Invalid threshold input. Threshold must be a positive number.');
+                return;
+            end
+        otherwise
+            disp('Error: Invalid stop method.');
+            return;
+    end
+
+    startApprox = NaN;
+    if strcmp(app.EnteranapproximationTextArea.Value, 'yes')
+        startApprox = app.EnterastartingapproximationEditField.Value;
+
+        if isempty(startApprox) || ~isvector(startApprox) || numel(startApprox) ~= n
+            disp('Error: Incorrect starting approximation input.');
+            return;
+        end
+    end
+
+    switch method
+        case 'Jacobi'
+            [x, iterations] = jacobiMethod(coefficientMatrix, right, startApprox, stopMethod, threshold);
+
+            if ~isempty(x)
+                disp('Roots:');
+                disp(x);
+                disp(['Number of iterations = ' num2str(iterations)]);
+
+                trueError = calculateTrueMeanAbsoluteError(coefficientMatrix, right, x);
+                disp(['True Mean Absolute Error: ' num2str(trueError)]);
+            else
+                disp('Error: No unique solution found.');
+            end
+
+        otherwise
+            disp('Error: Invalid iterative method. Use Jacobi.');
+    end
+end
+
+function [x, iterations] = jacobiMethod(A, b, x0, stopMethod, threshold)
+    n = length(b);
+    maxIterations = 1000;
+    x = x0;
+
+    iterations = 0;
+    while iterations < maxIterations
+        xPrev = x;
+
+        for i = 1:n
+            sigma = sum(A(i, 1:n) .* xPrev) - A(i, i) * xPrev(i);
+            x(i) = (b(i) - sigma) / A(i, i);
+        end
+
+        switch stopMethod
+            case 'threshold'
+                if norm(x - xPrev, inf) < threshold
+                    break;
+                end
+            case 'mae'
+                currentMAE = calculateTrueMeanAbsoluteError(A, b, x);
+                if currentMAE < threshold
+                    break;
+                end
+            case 'rmse'
+                currentRMSE = sqrt(mean((A * x - b).^2));
+                if currentRMSE < threshold
+                    break;
+                end
+            otherwise
+                disp('Error: Invalid stop method.');
+                return;
+        end
+
+        iterations = iterations + 1;
+    end
+
+    if iterations == maxIterations
+        disp('Maximum number of iterations reached.');
+    end
+end
+
+function trueError = calculateTrueMeanAbsoluteError(A, B, roots)
+    trueError = mean(abs(A * roots' - B));
+end
+
+function diagonalDominance = isDiagDominant(A)
+    diagonalDominance = all(abs(diag(A)) > sum(abs(A), 2) - abs(diag(A)));
+end
