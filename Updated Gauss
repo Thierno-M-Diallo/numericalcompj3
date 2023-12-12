@@ -1,0 +1,54 @@
+function gauss_seidel_solver()
+    % User inputs the size of the matrix
+    n = 3; % For a 3x3 matrix
+    
+    % Initialize the augmented matrix with zeros
+    A_b = zeros(n, n+1);
+    
+    % User inputs the augmented matrix
+    disp('Enter the augmented matrix (A|b) row by row:');
+    for i = 1:n
+        A_b(i, :) = input(['Enter row ' num2str(i) ' [a11 a12 ... a1n b1]: ']);
+    end
+    
+    % User inputs the initial guess
+    x0 = input('Enter the initial guess vector [x1; x2; ...; xn]: ');
+    
+    % User inputs the stopping criteria
+    tol = input('Enter the tolerance for the method: ');
+    max_iter = input('Enter the maximum number of iterations: ');
+    
+    % Perform Gauss-Seidel iteration
+    [x, error] = gauss_seidel(A_b, x0, tol, max_iter);
+    
+    % Display the results
+    disp('The solution vector is:');
+    disp(x);
+end
+
+function [x, error] = gauss_seidel(A_b, x, tol, max_iter)
+    n = size(A_b, 1);
+    error = inf;
+    for iter = 1:max_iter
+        x_old = x;
+        for i = 1:n
+            sigma = 0;
+            for j = 1:n
+                if j ~= i
+                    sigma = sigma + A_b(i,j) * x(j);
+                end
+            end
+            x(i) = (A_b(i,n+1) - sigma) / A_b(i,i);
+        end
+        
+        % Compute the current error
+        error = max(abs(x - x_old));
+        
+        % Check convergence
+        if error < tol
+            fprintf('Converged in %d iterations.\n', iter);
+            return;
+        end
+    end
+    fprintf('Did not converge within the maximum number of iterations.\n');
+end
